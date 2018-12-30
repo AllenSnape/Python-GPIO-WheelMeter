@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no">
+
+    <title>计数器</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+    <style>
+        body {
+            padding: 0;
+            transition: .25s;
+            background-color: #000;
+            color: aquamarine;
+        }
+
+        #Alert {
+            position: absolute;
+            top: 1rem;
+            left: 0;
+            width: 100%;
+            display: none;
+        }
+
+        #MeterContent {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+        }
+        #MeterContent > .row {
+            height: 100%;
+        }
+        #MeterContent > div > div {
+            height: 100%;
+            text-align: center;
+        }
+        #MeterContent > div > .side {
+            font-size: 2rem;
+            color: bisque;
+        }
+        #MeterContent > div > .side > div {
+            position: relative;
+            height: 100%;
+        }
+        #MeterContent > div > .side > div > div {
+            width: 100%;
+            position: absolute;
+            left: 0;
+            bottom: 10rem;
+        }
+
+        #MeterContent > div > .center {
+            position: relative;
+            padding-top: 5rem;
+        }
+        #MeterContent > div > .center > span {
+            display: inline-block;
+            font-size: 5rem;
+        }
+        #MeterContent > div > .center > div {
+            position: absolute;
+            width: 100%;
+            bottom: 10rem;
+            height: 5rem;
+        }
+        #MeterContent > div > .center > div > button {
+            font-size: 3rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="alert alert-primary" role="alert" id="Alert"></div>
+
+    <div class="container-fluid" id="MeterContent">
+        <div class="row">
+            <div class="col-4 side">
+                <div>
+                    <div><span id="Round">0</span> 圈</div>
+                </div>
+            </div>
+            <div class="col-4 center">
+                <span><span id="Speed">0.00</span><br/>km/h</span>
+
+                <div>
+                    <button class="btn btn-primary btn-lg btn-block" onclick="reset();">重置</button>
+                </div>
+            </div>
+            <div class="col-4 side">
+                <div>
+                    <div><span id="Distance">0</span> 千米</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+
+    <script>
+        // 轮胎周长(m)
+        const wheel = 1.32;
+
+        let count = 0;
+        let lastcount = 0;
+
+        const ws = new WebSocket('ws://' + location.hostname + ':' + (parseInt(location.port ? location.port : (location.protocol === 'https:' ? 443 : 80)) + 1));
+        ws.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            if (data.name === 'counter' && count < data.count) {
+                count = data.count;
+                $('#Round').text(count);
+                $('#Distance').text((count * wheel / 1000).toFixed(2));
+            }
+        };
+
+        setInterval(() => {
+            if (lastcount !== 0) {
+                $('#Speed').text(((count - lastcount) * wheel / 1000 * 3600).toFixed(2));
+            }
+            lastcount = count;
+        }, 1000);
+
+        function reset() {
+            $.get({
+                url: '/reset',
+                dataType: 'json',
+                success: function (res) {
+                    if (res.status === 200) {
+                        lastcount = 0;
+                        count = 0;
+                        $('#Round').text(0);
+                        $('#Speed').text(0);
+                        $('#Distance').text(0);
+                        bsAlert('重置成功!');
+                    } else bsAlert(res['msg']);
+                },
+                error: function (e) {
+                    console.error(e);
+                }
+            });
+        }
+
+        function bsAlert(msg) {
+            const al = $('#Alert');
+            al.text(msg);
+            al.fadeIn();
+            setTimeout(() => al.fadeOut(), 3000)
+        }
+    </script>
+</body>
+</html>
