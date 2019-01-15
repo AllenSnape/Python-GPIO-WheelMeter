@@ -50,6 +50,12 @@
             position: absolute;
             left: 0;
             bottom: 10rem;
+            cursor: pointer;
+            transition: .3s;
+            border-radius: 4px;
+        }
+        #MeterContent > div > .side > div > div:hover {
+            box-shadow: 0 0 20px 10px #ffffff80;
         }
 
         #MeterContent > div > .center {
@@ -77,20 +83,16 @@
 
     <div class="container-fluid" id="MeterContent">
         <div class="row">
-            <div class="col-4 side">
+            <div class="col-md-4 col-xs-12 side">
                 <div>
-                    <div><span id="Round">0</span> 圈</div>
+                    <div onclick="reset();"><span id="Round">0</span> 圈</div>
                 </div>
             </div>
-            <div class="col-4 center">
+            <div class="col-md-4 col-xs-12 center">
                 <span><span id="Speed">0.00</span><br/>km/h</span>
-
-                <div>
-                    <button class="btn btn-primary btn-lg btn-block" onclick="reset();">重置</button>
-                </div>
             </div>
-            <div class="col-4 side">
-                <div>
+            <div class="col-md-4 col-xs-12 side">
+                <div onclick="reset();">
                     <div><span id="Distance">0</span> 千米</div>
                 </div>
             </div>
