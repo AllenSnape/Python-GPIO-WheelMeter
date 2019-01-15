@@ -59,7 +59,7 @@ def publish_counter():
 # 监听的GPIO针脚
 pin = 7
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
 # 添加计数
@@ -90,7 +90,7 @@ def run_gpio():
 
 try:
     # 添加监听器
-    GPIO.add_event_detect(pin, GPIO.RISING, callback=do_count, bouncetime=100)
+    GPIO.add_event_detect(pin, GPIO.FALLING, callback=do_count, bouncetime=100)
     # 异步启动ws
     threading.Thread(target=ws.run_forever).start()
     # 启动网页
